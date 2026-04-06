@@ -1,26 +1,74 @@
- College Event Registration System
+#  College Event Registration System
 
-A full-stack web application that allows students to register for college events 
-and provides admins with a complete event management portal.
+> **Course:** Google Cloud Digital Leader — Capstone Project
+> **Stack:** MongoDB • Express.js • React.js • Node.js (MERN)
 
-> **Course:** Google Cloud Digital Leader — Capstone Project  
-> **Stack:** MongoDB, Express.js, React.js, Node.js (MERN)
+---
+
+##  Overview
+
+A full-stack web application where students can register for college events
+like Tech Fest, Cultural Night and Workshops. Admins can manage events
+and view all registrations through a secure portal.
+
+---
+
+##  Project Architecture
+┌─────────────────────────────────────────────────────┐
+│                   BROWSER                           │
+└──────────────────────┬──────────────────────────────┘
+│
+┌──────────────────────▼──────────────────────────────┐
+│              REACT FRONTEND                         │
+│         Tailwind CSS • React Router                 │
+│                                                     │
+│  Public Pages          Admin Pages                  │
+│  ├── Home              ├── Login                    │
+│  ├── Register          ├── Dashboard                │
+│  ├── Success           ├── Events (CRUD)            │
+│  └── Check Reg         └── Registrations            │
+└──────────────────────┬──────────────────────────────┘
+│ Axios HTTP Requests
+┌──────────────────────▼──────────────────────────────┐
+│           NODE.JS + EXPRESS BACKEND                 │
+│                                                     │
+│  Public Routes         Protected Routes (JWT)       │
+│  ├── GET /events       ├── POST /admin/events       │
+│  ├── POST /register    ├── PUT  /admin/events/:id   │
+│  └── GET /check/:email ├── DELETE /admin/events/:id │
+│                        ├── GET /admin/registrations  │
+│                        └── GET /admin/stats          │
+│                                                     │
+│  Middleware: JWT Auth • CORS • bcryptjs             │
+└──────────────────────┬──────────────────────────────┘
+│ Mongoose ODM
+┌──────────────────────▼──────────────────────────────┐
+│                  MONGODB                            │
+│                                                     │
+│  events          registrations       admins         │
+│  ├── name        ├── registrationId  ├── email      │
+│  ├── description ├── fullName        └── password   │
+│  ├── date        ├── email               (hashed)   │
+│  ├── venue       ├── phone                          │
+│  ├── category    ├── department                     │
+│  ├── capacity    ├── yearOfStudy                    │
+│  └── seatsLeft   └── eventName                      │
+└─────────────────────────────────────────────────────┘
 
 ---
 
 ##  Features
 
-### Students Can
-- Browse upcoming events with live seat availability
-- Register for events and receive a unique Registration ID
-- Check their registrations anytime using their email
+### Students (No Login Required)
+- Browse events with live seat availability
+- Register and receive a unique Registration ID
+- Check registrations anytime using email
 
-### Admin Can
-- Login securely with JWT authentication
-- Add, Edit and Delete events with custom categories
-- View registrations filtered by event with search
-- Export registrations to Excel (per event or all)
+### Admin (Secure Login)
+- Add, Edit and Delete events
 - View live dashboard stats
+- View registrations filtered by event tabs
+- Export registrations to Excel
 
 ---
 
@@ -28,59 +76,62 @@ and provides admins with a complete event management portal.
 
 | Layer | Technology |
 |---|---|
-| Frontend | React.js, Tailwind CSS, Axios |
-| Backend | Node.js, Express.js |
+| Frontend | React.js, Tailwind CSS, Axios, React Router |
+| Backend | Node.js, Express.js, JWT, bcryptjs |
 | Database | MongoDB, Mongoose |
-| Auth | JWT, bcryptjs |
 | Export | XLSX, File Saver |
 
 ---
 
 ##  Prerequisites
 
-Install these before running the project:
-
-- [Node.js](https://nodejs.org) — v18 or higher
-- [MongoDB Community](https://www.mongodb.com/try/download/community) — Latest
-- [Git](https://git-scm.com) — Latest
+- [Node.js v18+](https://nodejs.org)
+- [MongoDB Community](https://www.mongodb.com/try/download/community)
+- [Git](https://git-scm.com)
 
 ---
 
-##  Installation & Setup
+##  Setup & Installation
 
-### Step 1 — Clone the Repository
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/yourusername/college-event-registration.git
 cd college-event-registration
 ```
 
-### Step 2 — Setup Backend
+### 2. Backend Setup
 ```bash
 cd backend
 npm install
 ```
 
-Create `.env` file inside backend folder:
+Create `backend/.env`:
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/college_events
 JWT_SECRET=mysupersecretkey123
 ADMIN_EMAIL=admin@college.com
 ADMIN_PASSWORD=admin123
 
-### Step 3 — Setup Frontend
+### 3. Frontend Setup
 ```bash
 cd frontend
 npm install
 ```
 
-Create `.env` file inside frontend folder:
+Create `frontend/.env`:
 VITE_API_URL=http://localhost:5000/api
 
-### Step 4 — Create Admin Account
+### 4. Create Default Admin Account
 ```bash
 cd backend
 npm run seed
 ```
+
+Expected output:
+✅ MongoDB Connected
+✅ Admin created successfully!
+📧 Email: admin@college.com
+🔑 Password: admin123
 
 ---
 
@@ -100,64 +151,46 @@ cd frontend
 npm run dev
 ```
 
-Open browser and go to:
-http://localhost:5173
+Open browser: `http://localhost:5173`
 
 ---
 
 ##  Admin Login
+URL:      http://localhost:5173/admin/login
 Email:    admin@college.com
 Password: admin123
 
-Go to: `http://localhost:5173/admin/login`
+---
+
+##  Pages
+
+| Page | URL |
+|---|---|
+| Home | http://localhost:5173 |
+| Register | http://localhost:5173/register |
+| Check Registration | http://localhost:5173/check-registration |
+| Admin Login | http://localhost:5173/admin/login |
+| Admin Dashboard | http://localhost:5173/admin/dashboard |
+| Manage Events | http://localhost:5173/admin/events |
+| All Registrations | http://localhost:5173/admin/registrations |
 
 ---
 
-## 📡 Key API Endpoints
+##  API Endpoints
 
+### Public
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | /api/events | Get all events |
 | POST | /api/register | Register for event |
-| GET | /api/register/check/:email | Check registration by email |
+| GET | /api/register/check/:email | Check by email |
+
+### Admin (JWT Required)
+| Method | Endpoint | Description |
+|---|---|---|
 | POST | /api/admin/login | Admin login |
 | GET | /api/admin/stats | Dashboard stats |
 | POST | /api/admin/events | Create event |
 | PUT | /api/admin/events/:id | Update event |
 | DELETE | /api/admin/events/:id | Delete event |
 | GET | /api/admin/registrations | All registrations |
-
----
-
-##  GCP Cloud Architecture
-
-This local prototype is designed to migrate to Google Cloud Platform:
-
-| Local | Google Cloud Service | Why |
-|---|---|---|
-| React Frontend | Firebase Hosting | Serverless, global CDN |
-| Node/Express Backend | Cloud Run | Auto scaling, serverless containers |
-| MongoDB Local | Firestore | Serverless NoSQL database |
-| Manual Deploy | Cloud Build | CI/CD from GitHub |
-| Direct API Calls | Cloud Pub/Sub | Loose coupling for future services |
-
----
-
-##  Common Issues
-
-**Port 5000 already in use:**
-```bash
-netstat -ano | findstr :5000
-taskkill /PID <NUMBER> /F
-```
-
-**MongoDB not connecting:**
-- Open MongoDB Compass
-- Connect to `mongodb://localhost:27017`
-- Make sure MongoDB service is running
-
----
-
-# License
-Built for educational purposes as part of the 
-Google Cloud Digital Leader Capstone Project.
